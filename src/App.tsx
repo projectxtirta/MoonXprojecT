@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import './index.css'; //
 import DashboardAdmin from './components/admin/DashboardAdmin';
 import RegistrasiKaryawan from './components/karyawan/RegistrasiKaryawan';
 import Home from './pages/Home/Home';
