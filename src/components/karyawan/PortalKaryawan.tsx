@@ -117,17 +117,15 @@ const PortalKaryawan: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
     );
   }
 
-  return (
-    <div className="portal-page">
+  <div className="portal-page">
       <header className="portal-header">
         <div className="portal-brand">
-          <div className="portal-logo">M</div>
+          <div className="portal-logo">☾</div>
           <div>
-            <strong>MoonHR</strong>
+            <strong>MoonXprojectT</strong>
             <span>Employee Portal</span>
           </div>
         </div>
-
         <button className="portal-logout" onClick={handleLogout}>
           Keluar
         </button>
