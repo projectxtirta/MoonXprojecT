@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import './index.css'; //
-import DashboardAdmin from './components/admin/DashboardAdmin';
-import RegistrasiKaryawan from './components/karyawan/RegistrasiKaryawan';
+import { useState, useEffect } from 'react';
 import Home from './pages/Home/Home';
-import './styles/theme.css';
+import RegistrasiKaryawan from './components/karyawan/RegistrasiKaryawan';
+import DashboardAdmin from './components/admin/DashboardAdmin';
+import './index.css'; // Pastikan CSS utama/Tailwind tetap termuat
 
 type View = 'home' | 'admin' | 'register';
 
@@ -36,7 +35,7 @@ export default function App() {
 
             <span>
               <b>MoonXprojecT</b>
-              <small>Human Resources Platform</small>
+              {/* Teks "Human Resources Platform" sudah dihapus di sini */}
             </span>
           </button>
 
@@ -48,7 +47,10 @@ export default function App() {
               Beranda
             </button>
 
-            <button onClick={() => setView('register')}>
+            <button 
+              className={view === 'register' ? 'active' : ''}
+              onClick={() => setView('register')}
+            >
               Daftar Karyawan
             </button>
 
