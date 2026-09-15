@@ -97,9 +97,9 @@ const PortalKaryawan: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
     return (
       <div className="portal-page">
         <div className="portal-empty">
-          <div className="portal-logo">M</div>
+          <div className="portal-logo">☾</div>
 
-          <h1>MoonHR</h1>
+          <h1>MoonXprojectT</h1>
 
           <h2>Menunggu Verifikasi</h2>
 
@@ -107,7 +107,6 @@ const PortalKaryawan: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
             Pendaftaran Anda berhasil diterima. Data Anda sedang diperiksa
             oleh HR/Admin.
           </p>
-
           <div className="portal-status">
             Status: <strong>Menunggu Verifikasi</strong>
           </div>
