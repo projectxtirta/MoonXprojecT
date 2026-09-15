@@ -1,4 +1,10 @@
-export default function Navbar({ namaPerusahaan, onNavClick }: { namaPerusahaan: string; onNavClick: (view: string) => void }) {
+export default function Navbar({ 
+  namaPerusahaan = "MoonXprojecT", 
+  onNavClick 
+}: { 
+  namaPerusahaan?: string; 
+  onNavClick: (view: string) => void 
+}) {
   return (
     <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 30px', background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #334155' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => onNavClick('landing')}>
