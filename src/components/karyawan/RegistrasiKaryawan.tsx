@@ -116,15 +116,15 @@ const RegistrasiKaryawan: React.FC<RegistrasiKaryawanProps> = ({
     );
   }
 
-  return (
+ return (
     <div className="registration-page">
       <div className="registration-shell">
         <div className="registration-brand">
-          <div className="registration-logo">M</div>
+          <div className="registration-logo">☾</div>
 
           <div>
-            <strong>MoonHR</strong>
-            <span>Human Resource Management</span>
+            <strong>MoonXprojectT</strong>
+      <span>Human Resources Platform</span>
           </div>
         </div>
 
