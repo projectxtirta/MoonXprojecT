@@ -1,52 +1,271 @@
-import { useState } from 'react';
-import { supabase } from '../../supabaseClient';
+import React, { useState } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 import './registration.css';
 
-type Props = { onBack?: () => void };
+interface RegistrasiKaryawanProps {
+  onBack?: () => void;
+}
 
-export default function RegistrasiKaryawan({ onBack }: Props) {
-  const [form, setForm] = useState({ nama:'', email:'', no_telp:'', alamat_rumah:'', tanggal_lahir:'', password:'', konfirmasi:'' });
+const RegistrasiKaryawan: React.FC<RegistrasiKaryawanProps> = ({
+  onBack,
+}) => {
+  const [form, setForm] = useState({
+    nama: '',
+    email: '',
+    no_telp: '',
+    alamat_rumah: '',
+    tanggal_lahir: '',
+    password: '',
+    konfirmasi: '',
+  });
+
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
-  function change(key: keyof typeof form, value: string) { setForm(v => ({ ...v, [key]: value })); }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault(); setError(''); setSuccess('');
-    if (form.password.length < 8) return setError('Password minimal 8 karakter.');
-    if (form.password !== form.konfirmasi) return setError('Konfirmasi password tidak sama.');
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: form.email.trim().toLowerCase(),
-      password: form.password,
-      options: { data: { nama: form.nama.trim(), no_telp: form.no_telp.trim(), alamat_rumah: form.alamat_rumah.trim(), tanggal_lahir: form.tanggal_lahir || null } }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
     });
-    setLoading(false);
-    if (error) return setError(error.message);
-    setSuccess('Pendaftaran berhasil. Data Anda masuk sebagai Menunggu Verifikasi. HR/Admin akan memeriksa dan mengaktifkan akun Anda.');
-    setForm({ nama:'', email:'', no_telp:'', alamat_rumah:'', tanggal_lahir:'', password:'', konfirmasi:'' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setError('');
+
+    if (!form.nama.trim()) {
+      setError('Nama lengkap wajib diisi.');
+      return;
+    }
+
+    if (!form.email.trim()) {
+      setError('Email wajib diisi.');
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError('Password minimal 6 karakter.');
+      return;
+    }
+
+    if (form.password !== form.konfirmasi) {
+      setError('Konfirmasi password tidak sama.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: form.email.trim(),
+        password: form.password,
+        options: {
+          data: {
+            nama: form.nama.trim(),
+            no_telp: form.no_telp.trim(),
+            alamat_rumah: form.alamat_rumah.trim(),
+            tanggal_lahir: form.tanggal_lahir || null,
+          },
+        },
+      });
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err?.message || 'Pendaftaran gagal. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="registration-page">
+        <div className="registration-success">
+          <div className="registration-logo">M</div>
+
+          <h1>Pendaftaran Berhasil</h1>
+
+          <p>
+            Data Anda berhasil dikirim dan masuk ke proses verifikasi HR/Admin.
+          </p>
+
+          <div className="registration-success-box">
+            <strong>Menunggu Verifikasi</strong>
+            <span>
+              Akun Anda akan dapat digunakan setelah HR/Admin mengaktifkannya.
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="registration-button"
+            onClick={onBack}
+          >
+            Kembali ke Login
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  return <div className="registration-page">
-    <div className="registration-card">
-      <div className="registration-brand"><span className="registration-logo">M</span><div><strong>MoonHR</strong><small>Employee Registration</small></div></div>
-      <div className="registration-copy"><span>EMPLOYEE SELF REGISTRATION</span><h1>Buat akun karyawan</h1><p>Isi data diri Anda. Akun akan aktif setelah diverifikasi oleh HR/Admin.</p></div>
-      <form onSubmit={submit} className="registration-form">
-        <div className="registration-grid">
-          <label>Nama lengkap<input value={form.nama} onChange={e=>change('nama',e.target.value)} placeholder="Nama lengkap" required /></label>
-          <label>Email<input type="email" value={form.email} onChange={e=>change('email',e.target.value)} placeholder="nama@perusahaan.com" required /></label>
-          <label>No. HP<input value={form.no_telp} onChange={e=>change('no_telp',e.target.value)} placeholder="08xxxxxxxxxx" required /></label>
-          <label>Tanggal lahir<input type="date" value={form.tanggal_lahir} onChange={e=>change('tanggal_lahir',e.target.value)} /></label>
-          <label className="full">Alamat<input value={form.alamat_rumah} onChange={e=>change('alamat_rumah',e.target.value)} placeholder="Alamat lengkap" /></label>
-          <label>Password<input type="password" minLength={8} value={form.password} onChange={e=>change('password',e.target.value)} placeholder="Minimal 8 karakter" required /></label>
-          <label>Konfirmasi password<input type="password" minLength={8} value={form.konfirmasi} onChange={e=>change('konfirmasi',e.target.value)} placeholder="Ulangi password" required /></label>
+  return (
+    <div className="registration-page">
+      <div className="registration-shell">
+        <div className="registration-brand">
+          <div className="registration-logo">M</div>
+
+          <div>
+            <strong>MoonHR</strong>
+            <span>Human Resource Management</span>
+          </div>
         </div>
-        {error && <div className="registration-error">{error}</div>}
-        {success && <div className="registration-success">✓ {success}</div>}
-        <div className="registration-actions"><button type="button" className="registration-secondary" onClick={onBack}>Kembali ke Login</button><button className="registration-primary" disabled={loading}>{loading?'Mendaftarkan…':'Daftar sebagai Karyawan'}</button></div>
-      </form>
-      <p className="registration-note">Role otomatis <b>Karyawan</b>. Pengguna tidak dapat memilih Admin, HRD, Payroll, Supervisor, atau Super Admin.</p>
+
+        <div className="registration-card">
+          <div className="registration-heading">
+            <span className="registration-eyebrow">
+              EMPLOYEE REGISTRATION
+            </span>
+
+            <h1>Daftar sebagai Karyawan</h1>
+
+            <p>
+              Lengkapi data berikut untuk membuat akun karyawan MoonHR.
+            </p>
+          </div>
+
+          {error && (
+            <div className="registration-error">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="registration-section">
+              <h3>Data Pribadi</h3>
+
+              <div className="registration-field">
+                <label>Nama Lengkap *</label>
+                <input
+                  name="nama"
+                  value={form.nama}
+                  onChange={handleChange}
+                  placeholder="Masukkan nama lengkap"
+                  required
+                />
+              </div>
+
+              <div className="registration-row">
+                <div className="registration-field">
+                  <label>Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="nama@email.com"
+                    required
+                  />
+                </div>
+
+                <div className="registration-field">
+                  <label>No. Telepon</label>
+                  <input
+                    name="no_telp"
+                    value={form.no_telp}
+                    onChange={handleChange}
+                    placeholder="08xxxxxxxxxx"
+                  />
+                </div>
+              </div>
+
+              <div className="registration-field">
+                <label>Tanggal Lahir</label>
+                <input
+                  type="date"
+                  name="tanggal_lahir"
+                  value={form.tanggal_lahir}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="registration-field">
+                <label>Alamat Rumah</label>
+                <textarea
+                  name="alamat_rumah"
+                  value={form.alamat_rumah}
+                  onChange={handleChange}
+                  placeholder="Masukkan alamat lengkap"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <div className="registration-section">
+              <h3>Keamanan Akun</h3>
+
+              <div className="registration-row">
+                <div className="registration-field">
+                  <label>Password *</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="Minimal 6 karakter"
+                    required
+                  />
+                </div>
+
+                <div className="registration-field">
+                  <label>Konfirmasi Password *</label>
+                  <input
+                    type="password"
+                    name="konfirmasi"
+                    value={form.konfirmasi}
+                    onChange={handleChange}
+                    placeholder="Ulangi password"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="registration-role-note">
+              <strong>Role akun:</strong>
+              <span>Karyawan</span>
+              <p>
+                Role ditentukan otomatis dan tidak dapat dipilih sendiri.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              className="registration-button"
+              disabled={loading}
+            >
+              {loading ? 'Memproses...' : 'Daftar Sekarang'}
+            </button>
+
+            <button
+              type="button"
+              className="registration-back"
+              onClick={onBack}
+            >
+              Sudah memiliki akun? Kembali ke Login
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
-  </div>;
-}
+  );
+};
+
+export default RegistrasiKaryawan;
