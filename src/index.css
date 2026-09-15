@@ -37,27 +37,33 @@ body {
   border-bottom: 1px solid #1e293b;
 }
 
-.public-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* Hanya ubah warna teks menjadi putih untuk brand di Navbar dan Sidebar (area gelap) */
+.public-nav .public-brand, 
+.talenta-sidebar .brand {
+  background: transparent !important;
+  color: #ffffff !important;
 }
 
-.public-brand span {
-  font-size: 26px;
+.public-nav .public-brand b, 
+.talenta-sidebar .brand b {
+  color: #ffffff !important;
 }
 
-.public-brand b {
-  font-size: 17px;
-  color: #fff;
+.public-nav .public-brand span, 
+.talenta-sidebar .brand-mark,
+.brand-mark {
+  color: #d6ae58 !important; /* Aksen warna Gold untuk ikon bulan sabit */
 }
 
-.public-nav nav {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+/* Pastikan brand di dalam kotak login tetap berwarna gelap */
+.login-card .brand {
+  color: #172033 !important;
+  background: transparent !important;
 }
 
+.login-card .brand b {
+  color: #172033 !important;
+}
 /* Menu di pojok kanan atas berbingkai dan beraksen Gold */
 .public-nav nav button {
   border: 1px solid rgba(214, 174, 88, 0.35);
