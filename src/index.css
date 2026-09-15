@@ -175,3 +175,20 @@ body {
 .login-card p, .registration-card p, .login-card small {
   color: #667085 !important;
 }
+/* Membuat latar belakang area brand menjadi transparan di atas background Navy */
+.public-brand, 
+.brand {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Memastikan teks nama perusahaan dan ikon logo terlihat jelas berwarna putih/gold */
+.public-brand b, 
+.brand b {
+  color: #ffffff !important;
+}
+
+.public-brand span, 
+.brand-mark {
+  color: #d6ae58 !important; /* Aksen warna Gold untuk ikon bulan sabit */
+}
