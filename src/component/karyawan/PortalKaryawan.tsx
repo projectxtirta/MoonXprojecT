@@ -1,28 +1,238 @@
-import { useEffect, useRef, useState } from 'react';
-import { supabase } from '../../supabaseClient';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 import './portal.css';
 
-interface Karyawan { id:string; id_karyawan:string; nama:string; jabatan?:string; email?:string; gaji_pokok?:number; no_telp?:string; alamat_rumah?:string; }
-const isoToday=()=>new Date().toISOString().slice(0,10);
-const money=(v:number)=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v||0);
+type Employee = {
+  id: string;
+  id_karyawan: string;
+  nama: string;
+  email: string;
+  jabatan?: string | null;
+  departemen?: string | null;
+  status_karyawan?: string | null;
+  status_aktif?: boolean | null;
+};
 
-export default function PortalKaryawan(){
- const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[loading,setLoading]=useState(false),[error,setError]=useState('');
- const [user,setUser]=useState<any>(null),[employee,setEmployee]=useState<Karyawan|null>(null),[tab,setTab]=useState<'attendance'|'payslip'>('attendance');
- const [jenis,setJenis]=useState<'Masuk'|'Pulang'>('Masuk'),[photo,setPhoto]=useState<string|null>(null),[location,setLocation]=useState('Mendeteksi GPS…'),[notice,setNotice]=useState('');
- const video=useRef<HTMLVideoElement>(null),canvas=useRef<HTMLCanvasElement>(null);
- useEffect(()=>{supabase.auth.getUser().then(async({data})=>{if(data.user){setUser(data.user);await loadEmployee(data.user.email||'')}});const {data:sub}=supabase.auth.onAuthStateChange((_e,s)=>{if(!s?.user){setUser(null);setEmployee(null)}else{setUser(s.user);loadEmployee(s.user.email||'')}});return()=>sub.subscription.unsubscribe()},[]);
- useEffect(()=>{if(employee&&tab==='attendance'){startCamera();getLocation()}else stopCamera();return stopCamera},[employee,tab]);
- async function loadEmployee(mail:string){const {data,error}=await supabase.from('karyawan').select('*').eq('email',mail).maybeSingle();if(error){setError(error.message);return}if(!data){setError('Akun login belum terhubung ke data karyawan. Hubungi HR untuk mengaktifkan akun.');return}if(data.status_aktif===false || data.status_karyawan==='Menunggu Verifikasi'){setEmployee(null);setError('Pendaftaran Anda masih Menunggu Verifikasi HR/Admin. Anda belum dapat masuk ke Portal Karyawan.');return}setEmployee(data as Karyawan);setError('')}
- async function login(e:React.FormEvent){e.preventDefault();setLoading(true);setError('');const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error||!data.user){setError(error?.message||'Login gagal.');setLoading(false);return}await loadEmployee(data.user.email||email);setLoading(false)}
- async function reset(){if(!email)return setError('Masukkan email terlebih dahulu.');setLoading(true);const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.origin});setLoading(false);setNotice(error?error.message:'Link reset password telah dikirim ke email.')}
- async function startCamera(){try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}}});if(video.current){video.current.srcObject=s;await video.current.play()}}catch{setNotice('Kamera tidak tersedia/izin kamera ditolak. Absen tetap dapat dilakukan tanpa foto jika kebijakan perusahaan mengizinkan.')}}
- function stopCamera(){const s=video.current?.srcObject as MediaStream|null;s?.getTracks().forEach(t=>t.stop());if(video.current)video.current.srcObject=null}
- function getLocation(){if(!navigator.geolocation)return setLocation('GPS tidak tersedia');navigator.geolocation.getCurrentPosition(p=>setLocation(`${p.coords.latitude.toFixed(6)}, ${p.coords.longitude.toFixed(6)}`),()=>setLocation('Izin GPS ditolak'))}
- function takePhoto(){if(!video.current||!canvas.current)return;const c=canvas.current,v=video.current;c.width=v.videoWidth||640;c.height=v.videoHeight||480;c.getContext('2d')?.drawImage(v,0,0,c.width,c.height);setPhoto(c.toDataURL('image/jpeg',.82))}
- async function attendance(){if(!employee)return;setLoading(true);setNotice('');const date=isoToday();const now=new Date();const time=now.toTimeString().slice(0,5);const {data:existing}=await supabase.from('absensi').select('*').eq('id_karyawan',employee.id_karyawan).eq('tanggal',date).maybeSingle();if(jenis==='Masuk'){if(existing?.jam_masuk){setNotice('Absen masuk hari ini sudah tercatat.');setLoading(false);return}const payload={id_karyawan:employee.id_karyawan,nama:employee.nama,jabatan:employee.jabatan||'',tanggal:date,jam_masuk:time,jam_pulang:null,total_jam:null,status:'Hadir',lokasi:location,selfie_masuk:photo};const {error}=await supabase.from('absensi').insert(payload);setNotice(error?error.message:'Absen masuk berhasil disimpan.')}else{if(!existing){setNotice('Belum ada absen masuk hari ini.');setLoading(false);return}const start=String(existing.jam_masuk||'').split(':').map(Number);const end=time.split(':').map(Number);let mins=(end[0]*60+end[1])-(start[0]*60+start[1]);if(mins<0)mins+=1440;const total=`${Math.floor(mins/60)} Jam ${mins%60} Menit`;const {error}=await supabase.from('absensi').update({jam_pulang:time,total_jam:total,lokasi_pulang:location,selfie_pulang:photo}).eq('id',existing.id);setNotice(error?error.message:`Absen pulang berhasil disimpan. Total: ${total}`)}setPhoto(null);setLoading(false)}
- async function logout(){stopCamera();await supabase.auth.signOut();setEmployee(null);setUser(null)}
- if(!user||!employee)return <div className="employee-login"><div className="employee-login-card"><div className="employee-brand"><span className="employee-logo">M</span><div><strong>MoonHR</strong><small>Employee Portal</small></div></div><div className="login-copy"><span className="portal-eyebrow">SECURE WORKFORCE ACCESS</span><h2>Selamat datang kembali.</h2><p>Masuk untuk mengelola absensi, jadwal, dan informasi payroll Anda.</p></div><form onSubmit={login} className="employee-form"><label>Email<input type="email" placeholder="nama@perusahaan.com" value={email} onChange={e=>setEmail(e.target.value)} required /></label><label>Password<input type="password" placeholder="Masukkan password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>{error&&<div className="portal-error">{error}</div>}{notice&&<div className="portal-info">{notice}</div>}<button disabled={loading} className="portal-primary">{loading?'Memproses…':'Masuk ke Portal'}</button><button type="button" onClick={reset} className="portal-link">Lupa password?</button></form><p className="login-footnote">Belum punya akun? <button type="button" className="portal-link" onClick={()=>window.dispatchEvent(new CustomEvent('moonhr:register'))}>Daftar sebagai karyawan</button></p></div></div>;
- return <div className="employee-portal"><div className="employee-topbar"><div className="employee-brand"><span className="employee-logo">M</span><div><strong>MoonHR</strong><small>Employee Portal</small></div></div><div className="employee-user"><div className="employee-avatar">{employee.nama.charAt(0).toUpperCase()}</div><div><b>{employee.nama}</b><small>{employee.jabatan||'Karyawan'}</small></div><button onClick={logout} className="portal-logout">Keluar</button></div></div><div className="employee-page"><div className="employee-heading"><div><span className="portal-eyebrow">EMPLOYEE SELF SERVICE</span><h1>Halo, {employee.nama.split(' ')[0]}.</h1><p>{employee.id_karyawan} · {employee.jabatan||'Karyawan'} · {employee.email||''}</p></div><div className="date-chip">● {new Date().toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}</div></div><div className="employee-tabs"><button className={tab==='attendance'?'active':''} onClick={()=>setTab('attendance')}>Absensi</button><button className={tab==='payslip'?'active':''} onClick={()=>setTab('payslip')}>Slip Gaji</button></div>{notice&&<div className="portal-info">{notice}</div>}{tab==='attendance'?<div className="attendance-grid"><section className="portal-card attendance-card"><div className="card-title"><div><span>ABSENSI HARI INI</span><h2>Catat kehadiran</h2></div><span className="status-badge">● Aktif</span></div><div className="attendance-meta"><div><small>GPS</small><b>{location}</b></div><div><small>Mode</small><b>{jenis}</b></div></div><select value={jenis} onChange={e=>setJenis(e.target.value as any)}><option>Masuk</option><option>Pulang</option></select><div className="camera-frame"><video ref={video} autoPlay playsInline muted/><div className="camera-overlay">{photo?'✓ Foto siap':'Posisikan wajah di area kamera'}</div></div><canvas ref={canvas} style={{display:'none'}}/><div className="attendance-actions"><button type="button" onClick={takePhoto} className="portal-secondary">{photo?'✓ Ambil Ulang':'Ambil Foto Selfie'}</button><button type="button" onClick={attendance} disabled={loading} className="portal-primary">{loading?'Menyimpan…':`Simpan Absen ${jenis}`}</button></div></section><section className="portal-card info-card"><span className="card-kicker">RINGKASAN</span><h2>Informasi kerja</h2><div className="info-list"><div><small>ID Karyawan</small><b>{employee.id_karyawan}</b></div><div><small>Jabatan</small><b>{employee.jabatan||'-'}</b></div><div><small>Gaji Pokok</small><b>{money(Number(employee.gaji_pokok||0))}</b></div><div><small>Status</small><b className="text-success">Aktif</b></div></div><div className="security-box"><b>🔒 Data terlindungi</b><p>Lokasi dan foto absensi dikirim secara aman untuk kebutuhan administrasi HR.</p></div></section></div>:<Payslip employee={employee}/>}</div></div>
-}
-function Payslip({employee}:{employee:Karyawan}){const [rows,setRows]=useState<any[]>([]);useEffect(()=>{supabase.from('hris_payroll').select('*').eq('id_karyawan',employee.id_karyawan).eq('status','Dibayar').order('periode',{ascending:false}).limit(12).then(({data})=>setRows(data||[]))},[employee.id_karyawan]);return <div className="payslip-grid">{rows.length?rows.map(r=><div key={r.id} className="portal-card payslip-card"><div><span className="card-kicker">SLIP GAJI</span><h2>Periode {r.periode}</h2></div><div className="salary-value">{money(Number(r.gaji_bersih||0))}</div><p>Status <b className="text-success">{r.status}</b> · Dibayar {r.tanggal_bayar||'-'}</p><button className="portal-secondary" onClick={()=>window.print()}>Cetak Slip</button></div>):<div className="portal-card empty-state"><div className="empty-icon">Rp</div><h2>Belum ada slip gaji</h2><p>Slip dengan status Dibayar akan muncul di sini.</p></div>}</div>}
+const PortalKaryawan: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
+  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    loadEmployee();
+  }, []);
+
+  const loadEmployee = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('karyawan')
+        .select(
+          'id,id_karyawan,nama,email,jabatan,departemen,status_karyawan,status_aktif'
+        )
+        .eq('auth_user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setEmployee(data);
+      }
+    } catch (error: any) {
+      setMessage(error?.message || 'Gagal memuat data karyawan.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+
+    if (onLogout) {
+      onLogout();
+    }
+
+    window.location.reload();
+  };
+
+  if (loading) {
+    return (
+      <div className="portal-page">
+        <div className="portal-loading">
+          <div className="portal-spinner" />
+          <p>Memuat portal karyawan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!employee) {
+    return (
+      <div className="portal-page">
+        <div className="portal-empty">
+          <h2>Data Karyawan Tidak Ditemukan</h2>
+          <p>
+            Akun Anda belum terhubung dengan data karyawan. Silakan hubungi
+            HR/Admin.
+          </p>
+          <button onClick={handleLogout}>Keluar</button>
+        </div>
+      </div>
+    );
+  }
+
+  const waiting =
+    employee.status_aktif === false ||
+    employee.status_karyawan === 'Menunggu Verifikasi';
+
+  if (waiting) {
+    return (
+      <div className="portal-page">
+        <div className="portal-empty">
+          <div className="portal-logo">M</div>
+
+          <h1>MoonHR</h1>
+
+          <h2>Menunggu Verifikasi</h2>
+
+          <p>
+            Pendaftaran Anda berhasil diterima. Data Anda sedang diperiksa
+            oleh HR/Admin.
+          </p>
+
+          <div className="portal-status">
+            Status: <strong>Menunggu Verifikasi</strong>
+          </div>
+
+          <button onClick={handleLogout}>Keluar</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="portal-page">
+      <header className="portal-header">
+        <div className="portal-brand">
+          <div className="portal-logo">M</div>
+          <div>
+            <strong>MoonHR</strong>
+            <span>Employee Portal</span>
+          </div>
+        </div>
+
+        <button className="portal-logout" onClick={handleLogout}>
+          Keluar
+        </button>
+      </header>
+
+      <main className="portal-container">
+        <section className="portal-welcome">
+          <div>
+            <span className="portal-eyebrow">EMPLOYEE PORTAL</span>
+            <h1>
+              Halo, {employee.nama}
+            </h1>
+            <p>
+              Selamat datang di portal karyawan MoonHR.
+            </p>
+          </div>
+
+          <div className="portal-id-card">
+            <span>ID Karyawan</span>
+            <strong>{employee.id_karyawan}</strong>
+          </div>
+        </section>
+
+        {message && (
+          <div className="portal-alert">
+            {message}
+          </div>
+        )}
+
+        <section className="portal-grid">
+          <div className="portal-card">
+            <div className="portal-card-title">
+              <span>Profil Saya</span>
+            </div>
+
+            <div className="portal-profile">
+              <div className="portal-avatar">
+                {employee.nama?.charAt(0)?.toUpperCase() || 'K'}
+              </div>
+
+              <div>
+                <h3>{employee.nama}</h3>
+                <p>{employee.jabatan || 'Karyawan'}</p>
+              </div>
+            </div>
+
+            <div className="portal-details">
+              <div>
+                <span>Email</span>
+                <strong>{employee.email || '-'}</strong>
+              </div>
+
+              <div>
+                <span>ID Karyawan</span>
+                <strong>{employee.id_karyawan || '-'}</strong>
+              </div>
+
+              <div>
+                <span>Departemen</span>
+                <strong>{employee.departemen || '-'}</strong>
+              </div>
+
+              <div>
+                <span>Jabatan</span>
+                <strong>{employee.jabatan || '-'}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="portal-card">
+            <div className="portal-card-title">
+              <span>Status Kepegawaian</span>
+            </div>
+
+            <div className="portal-status-large">
+              <span className="status-dot" />
+              <div>
+                <strong>{employee.status_karyawan || 'Aktif'}</strong>
+                <p>Status akun Anda saat ini</p>
+              </div>
+            </div>
+
+            <div className="portal-info">
+              <p>
+                Untuk perubahan data pribadi, jadwal, cuti, absensi, atau
+                informasi payroll, silakan hubungi HR/Admin perusahaan.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="portal-card portal-notice">
+          <div>
+            <span className="portal-eyebrow">INFORMASI</span>
+            <h2>Portal Karyawan MoonHR</h2>
+            <p>
+              Portal ini digunakan untuk mengakses informasi kepegawaian Anda
+              secara terpusat.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+};
+
+export default PortalKaryawan;
