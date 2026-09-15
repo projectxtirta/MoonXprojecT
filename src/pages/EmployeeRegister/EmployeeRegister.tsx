@@ -4,6 +4,12 @@ interface EmployeeRegisterProps {
   onBack: () => void;
 }
 
-export default function EmployeeRegister({ onBack }: EmployeeRegisterProps) {
-  return <div className="public-page"><RegistrasiKaryawan onBack={onBack} /></div>;
+export default function EmployeeRegister({
+  onBack,
+}: EmployeeRegisterProps) {
+  return (
+    <RegistrasiKaryawan
+      onBack={onBack}
+    />
+  );
 }
