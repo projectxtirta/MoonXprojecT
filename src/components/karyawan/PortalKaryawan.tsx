@@ -117,7 +117,8 @@ const PortalKaryawan: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
     );
   }
 
-  <div className="portal-page">
+  return (
+    <div className="portal-page">
       <header className="portal-header">
         <div className="portal-brand">
           <div className="portal-logo">☾</div>
@@ -139,7 +140,7 @@ const PortalKaryawan: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
               Halo, {employee.nama}
             </h1>
             <p>
-              Selamat datang di portal karyawan MoonHR.
+              Selamat datang di portal karyawan MoonXprojectT.
             </p>
           </div>
 
@@ -220,7 +221,7 @@ const PortalKaryawan: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
         <section className="portal-card portal-notice">
           <div>
             <span className="portal-eyebrow">INFORMASI</span>
-            <h2>Portal Karyawan MoonHR</h2>
+            <h2>Portal Karyawan MoonXprojectT</h2>
             <p>
               Portal ini digunakan untuk mengakses informasi kepegawaian Anda
               secara terpusat.
