@@ -158,3 +158,20 @@ body {
     padding: 10px;
   }
 }
+/* Memastikan teks di dalam kotak kartu (yang berlatar belakang putih) berwarna gelap kembali */
+.login-card, 
+.registration-card, 
+.portal-card, 
+.portal-empty {
+  color: #172033 !important;
+}
+
+.login-card h1, .login-card h2, .login-card b, .login-card strong, .login-card p,
+.registration-card h1, .registration-card h2, .registration-card b, .registration-card strong, .registration-card p {
+  color: #0d1b35 !important;
+}
+
+/* Khusus untuk teks deskripsi pendukung di kartu */
+.login-card p, .registration-card p, .login-card small {
+  color: #667085 !important;
+}
