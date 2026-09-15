@@ -97,12 +97,48 @@ export default function DashboardAdmin(){
  if(!logged)return <Login email={email} pin={pin} setEmail={setEmail} setPin={setPin} onSubmit={login} loading={loading} error={error}/>;
  return <div className="talenta-shell">
   <aside className={`talenta-sidebar ${sidebar?'':'collapsed'}`}>
-   <div className="brand"><div className="brand-mark">M</div>{sidebar&&<div><b>MoonHR</b><small>People Platform</small></div>}</div>
-   {sidebar&&<div className="workspace"><span>WORKSPACE</span><b>Moonjustfine by Tirta</b><small>HR Management</small></div>}
-   <nav className="sidebar-nav">{menuGroups.map(g=><div className="nav-group" key={g.title}>
-    {g.items.some(([key])=>menuPermissionForRole(key,userRole)) && sidebar&&<button className="group-title" onClick={()=>setOpen(v=>({...v,[g.title]:!v[g.title]}))}><span>{g.title}</span><span>{open[g.title]?'⌄':'›'}</span></button>}
-    {(sidebar?open[g.title]:true)&&g.items.filter(([key])=>menuPermissionForRole(key,userRole)).map(([key,label,icon])=><button key={key} className={`nav-item ${menu===key?'active':''}`} onClick={()=>setMenu(key as MenuKey)} title={label}><span className="nav-icon">{icon}</span>{sidebar&&<span>{label}</span>}{key==='employees'&&sidebar&&<em>{employees.length}</em>}</button>)}
-   </div>)}</nav>
+ <div className="brand">
+  <div className="brand-mark">☾</div>
+  {sidebar && (
+    <div>
+      <b>MoonXprojectT</b>
+      <small>Human Resources Platform</small>
+    </div>
+  )}
+</div>
+
+{sidebar && (
+  <div className="workspace">
+    <span>WORKSPACE</span>
+    <b>Moonjustfine by Tirta</b>
+    <small>HR Management</small>
+  </div>
+)}
+
+<nav className="sidebar-nav">
+  {menuGroups.map(g => (
+    <div className="nav-group" key={g.title}>
+      {g.items.some(([key]) => menuPermissionForRole(key, userRole)) && sidebar && (
+        <button className="group-title" onClick={() => setOpen(v => ({ ...v, [g.title]: !v[g.title] }))}>
+          <span>{g.title}</span>
+          <span>{open[g.title] ? '⌄' : '›'}</span>
+        </button>
+      )}
+      {(sidebar ? open[g.title] : true) && g.items.filter(([key]) => menuPermissionForRole(key, userRole)).map(([key, label, icon]) => (
+        <button 
+          key={key} 
+          className={`nav-item ${menu === key ? 'active' : ''}`} 
+          onClick={() => setMenu(key as MenuKey)} 
+          title={label}
+        >
+          <span className="nav-icon">{icon}</span>
+          {sidebar && <span>{label}</span>}
+          {key === 'employees' && sidebar && <em>{employees.length}</em>}
+        </button>
+      ))}
+    </div>
+  ))}
+</nav>
    <div className="sidebar-bottom"><div className="admin-mini"><div className="avatar">HR</div>{sidebar&&<div><b>{userRole||'User'}</b><small>MoonHR Access</small></div>}</div><button className="logout" onClick={async()=>{await signOut();setLogged(false)}}>↪ {sidebar&&'Keluar'}</button></div>
   </aside>
   <main className="talenta-main"><header className="topbar"><button className="icon-btn" onClick={()=>setSidebar(v=>!v)}>☰</button><div className="crumb"><span>MoonHR</span><b>/</b>{activeLabel}</div><div className="top-actions"><div className="search-global"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Cari data..."/></div><button className="icon-btn" onClick={()=>refresh()}>↻</button><div className="avatar">HR</div></div></header>
