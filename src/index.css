@@ -1,38 +1,160 @@
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#172033;background:#f6f8fb;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
-*{box-sizing:border-box}
-body{margin:0;min-width:320px}
-.app-root{min-height:100vh}
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #f8fafc;
+  background: #0b132b;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #0b132b;
+  color: #f8fafc;
+}
+
+.app-root {
+  min-height: 100vh;
+  background: #0b132b;
+}
 
 /* Navbar: Background Navy dengan Border Tipis */
-.public-nav{height:64px;background:#0b132b;color:white;display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:relative;z-index:5;border-bottom:1px solid #1e293b}
-.public-brand{display:flex;align-items:center;gap:8px}
-.public-brand span{font-size:26px}
-.public-brand b{font-size:17px}
+.public-nav {
+  height: 64px;
+  background: #0b132b;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
+  position: relative;
+  z-index: 5;
+  border-bottom: 1px solid #1e293b;
+}
 
-.public-nav nav{display:flex;gap:8px;align-items:center}
-.public-nav button{border:0;background:transparent;color:#94a3b8;padding:9px 12px;border-radius:7px;cursor:pointer;font-size:12px;transition:all 0.2s ease}
+.public-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-/* Menu Hover & Active diberi warna Gold */
-.public-nav button:hover,
-.public-nav button.active{background:#1e293b;color:#d6ae58}
+.public-brand span {
+  font-size: 26px;
+}
 
-/* Tombol Login HR (menu terakhir di pojok kanan) diberi bingkai/list Gold */
-.public-nav nav button:last-child{border:1px solid rgba(214,174,88,0.4);color:#d6ae58;background:rgba(214,174,88,0.05)}
-.public-nav nav button:last-child:hover{background:rgba(214,174,88,0.15);border-color:#d6ae58}
+.public-brand b {
+  font-size: 17px;
+  color: #fff;
+}
 
-.hero{min-height:calc(100vh - 64px);display:grid;place-items:center;padding:40px 20px;background:radial-gradient(circle at 20% 10%,#dbeafe 0,#f6f8fb 38%,#fff 100%)}
-.hero-card{max-width:760px;text-align:center}
-.eyebrow{font-size:10px;color:#2563eb;font-weight:800;letter-spacing:1.4px}
-.hero h1{font-size:48px;line-height:1.08;letter-spacing:-1.5px;margin:14px 0;color:#111827}
-.hero p{max-width:620px;margin:0 auto 24px;color:#667085;font-size:14px;line-height:1.7}
-.hero-primary,.hero-secondary{border-radius:9px;padding:12px 17px;font-size:12px;font-weight:700;cursor:pointer}
-.hero-primary{background:#2563eb;color:#fff;border:1px solid #2563eb}
-.hero-secondary{margin-left:8px;background:#fff;color:#344054;border:1px solid #d0d5dd}
-.public-page{padding:25px;max-width:1250px;margin:auto}
+.public-nav nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
-@media(max-width:650px){
-  .public-nav nav button:nth-child(1){display:none}
-  .hero h1{font-size:35px}
-  .hero-secondary{margin:8px 0 0}
-  .public-page{padding:10px}
+/* Menu di pojok kanan atas berbingkai dan beraksen Gold */
+.public-nav nav button {
+  border: 1px solid rgba(214, 174, 88, 0.35);
+  background: rgba(214, 174, 88, 0.05);
+  color: #d6ae58;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Menu Hover & Active */
+.public-nav nav button:hover,
+.public-nav nav button.active {
+  background: rgba(214, 174, 88, 0.2);
+  border-color: #d6ae58;
+  color: #f3e5ab;
+}
+
+/* Hero Section: Background Navy */
+.hero {
+  min-height: calc(100vh - 64px);
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  background: #0b132b;
+}
+
+.hero-card {
+  max-width: 760px;
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: 10px;
+  color: #d6ae58;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.hero h1 {
+  font-size: 48px;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+  margin: 14px 0;
+  color: #ffffff;
+}
+
+.hero p {
+  max-width: 620px;
+  margin: 0 auto 24px;
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.hero-primary,
+.hero-secondary {
+  border-radius: 9px;
+  padding: 12px 17px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hero-primary {
+  background: #2563eb;
+  color: #fff;
+  border: 1px solid #2563eb;
+}
+
+.hero-secondary {
+  margin-left: 8px;
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #334155;
+}
+
+.public-page {
+  padding: 25px;
+  max-width: 1250px;
+  margin: auto;
+}
+
+@media(max-width: 650px) {
+  .public-nav nav button:nth-child(1) {
+    display: none;
+  }
+  .hero h1 {
+    font-size: 35px;
+  }
+  .hero-secondary {
+    margin: 8px 0 0;
+  }
+  .public-page {
+    padding: 10px;
+  }
 }
